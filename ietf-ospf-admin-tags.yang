@@ -89,8 +89,8 @@ module ietf-ospf-admin-tags {
     }
     description
       "This augments the OSPFv2 protocol interface configuration
-       with Administrative Tags. The configured tags will be 
-       advertised with local prefixes configured for the interface";
+       with Administrative Tags. The configured tags will be
+      advertised with local prefixes configured for the interface.";
 
     container admin-tags {
       leaf-list tags {
@@ -123,13 +123,13 @@ module ietf-ospf-admin-tags {
     uses prefix-admin-tag-sub-tlvs;
   }
 
- 
+
   augment "/rt:routing/"
         + "rt:control-plane-protocols/rt:control-plane-protocol/"
         + "ospf:ospf/ospf:areas/"
         + "ospf:area/ospf:database/"
-        + "ospf:area-scope-lsa-type/ospf:area-scope-lsas/" 
-        + "ospf:area-scope-lsa/ospf:version/ospf:ospfv2/" 
+        + "ospf:area-scope-lsa-type/ospf:area-scope-lsas/"
+        + "ospf:area-scope-lsa/ospf:version/ospf:ospfv2/"
         + "ospf:ospfv2/ospf:body/ospf:opaque/"
         + "ospf:extended-prefix-opaque/ospf:extended-prefix-tlv" {
     when "/rt:routing/rt:control-plane-protocols"
@@ -138,7 +138,7 @@ module ietf-ospf-admin-tags {
         "This augmentation is only valid for OSPFv2.";
     }
     description
-      "Prefix Administrative Tag Sub-TLVs for OSPFv2 extended prefix 
+      "Prefix Administrative Tag Sub-TLVs for OSPFv2 extended prefix
        TLV in type 10 opaque LSA.";
     uses prefix-admin-tag-sub-tlvs;
   }
@@ -156,8 +156,9 @@ module ietf-ospf-admin-tags {
         "This augmentation is only valid for OSPFv2.";
     }
     description
-      "Prefix Administrative Tag Sub-TLVs for OSPFv2 extended prefix 
+      "Prefix Administrative Tag Sub-TLVs for OSPFv2 extended prefix
        TLV in type 11 opaque LSA.";
     uses prefix-admin-tag-sub-tlvs;
   }
 }
+  
