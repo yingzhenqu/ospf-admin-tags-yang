@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<!DOCTYPE rfc [
+    <!ENTITY RFC2119 PUBLIC ''
+      'http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml'>
+    <!ENTITY RFC2328 PUBLIC ''
+      'http://xml.resource.org/public/rfc/bibxml/reference.RFC.2328.xml'>
+    <!ENTITY RFC3101 PUBLIC ''
+      'http://xml.resource.org/public/rfc/bibxml/reference.RFC.3101.xml'>
+    <!ENTITY RFC3630 PUBLIC ''
+      'http://xml.resource.org/public/rfc/bibxml/reference.RFC.3630.xml'>
+    <!ENTITY RFC4271 PUBLIC ''
+      'http://xml.resource.org/public/rfc/bibxml/reference.RFC.4271.xml'>
+    <!ENTITY RFC5130 PUBLIC ''
+      'http://xml.resource.org/public/rfc/bibxml/reference.RFC.5130.xml'>
+    <!ENTITY RFC5340 PUBLIC ''
+      'http://xml.resource.org/public/rfc/bibxml/reference.RFC.5340.xml'>
+    <!ENTITY RFC7684 PUBLIC ''
+      'http://xml.resource.org/public/rfc/bibxml/reference.RFC.7684.xml'>
+    <!ENTITY RFC8174 PUBLIC ''
+      'http://xml.resource.org/public/rfc/bibxml/reference.RFC.8174.xml'>
+    <!ENTITY RFC8362 PUBLIC ''
+      'http://xml.resource.org/public/rfc/bibxml/reference.RFC.8362.xml'>
+    <!ENTITY RFC8920 PUBLIC ''
+      'http://xml.resource.org/public/rfc/bibxml/reference.RFC.8920.xml'>
+    ]>
+<?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
+<?rfc strict="no" ?>
+<?rfc toc="yes" ?>
+<?rfc symrefs="yes" ?>
+<?rfc sortrefs="yes"?>
+
+<?rfc rfcedstyle="yes" ?>
+<?rfc subcompact="no" ?>
+
+<rfc category="std" ipr="trust200902" docName="draft-ietf-lsr-ospf-admin-tags-04"
+  consensus="true" submissionType="IETF" version="3">
+
+<front>
+<title abbrev="OSPF Administrative Tags">
+   Extensions to OSPF for Advertising Prefix Administrative Tags</title>
+  <author initials='A.' surname="Lindem" fullname='Acee Lindem' role="editor">
+    <organization>Cisco Systems</organization>
+    <address>
+      <postal>
+        <street>301 Midenhall Way</street>
+        <city>Cary</city> <region>NC</region>
+        <country>USA</country>
+        <code>27513</code>
+       </postal>
+       <email>acee@cisco.com</email>
+    </address>
+    </author>
+
+  <author initials='P.' surname="Psenak" fullname='Peter Psenak'>
+    <organization>Cisco Systems</organization>
+    <address>
+      <postal>
+        <street>Apollo Business Center</street>
+        <street>Mlynske nivy 43</street>
+        <city>Bratislava 821 09</city>
+        <country>Slovakia</country>
+        <code></code>
+       </postal>
+       <email>ppsenak@cisco.com</email>
+    </address>
+    </author>
+  <date/>
+  <abstract>
+   <t>It is useful for routers in an OSPFv2 or OSPFv3 routing domain to be able to
+   associate tags with prefixes.
+   Previously, OSPFv2 and OSPFv3 were relegated to a single tag for AS External and
+   Not-So-Stubby-Area (NSSA) prefixes.
+   With the flexible encodings provided by OSPFv2 Prefix/Link Attribute Advertisement
+   and OSPFv3 Extended LSAs, multiple administrative
+   tags may advertised for all types of prefixes. These administrative
+   tags can be used for many applications including route redistribution policy, selective
+   prefix prioritization, selective IP Fast-ReRoute (IPFRR) prefix protection, and many
+   others.</t>
+   <t>The ISIS protocol supports a similar mechanism that is described in RFC 5130.</t>
+  </abstract>
+</front>
+
+<middle>
+<section title="Introduction">
+  <t>
+    It is useful for routers in an OSPFv2 <xref target="RFC2328"/>
+    or OSPFv3 <xref target="RFC5340"/> routing domain to be able to associate tags with prefixes.
+    Previously, OSPFv3 and OSPFv3 were relegated to a single tag for AS External and
+    Not-So-Stubby-Area (NSSA) prefixes.
+    With the flexible encodings provided by OSPFv2 Prefix/Link Attribute Advertisement
+    (<xref target="RFC7684"/>) and OSPFv3 Extended LSA (<xref target="RFC8362"/>),
+    multiple administrative tags may be advertised for all types of prefixes. These administrative
+    tags can be used many applications including (but not limited to):
+  </t>
+  <ol spacing="normal">
+   <li>Controlling which routes are redistributed into other protocols for
+       readvertisement.</li>
+   <li>Prioritizing selected prefixes for faster convergence and installation in the
+      forwarding plane.</li>
+   <li>Identifying selected prefixes for Loop-Free Alternative (LFA) protection.</li>
+  </ol>
+  <t>Throughout this document, OSPF is used when the text applies to both
+   OSPFv2 and OSPFv3.  OSPFv2 or OSPFv3 is used when the text is
+   specific to one version of the OSPF protocol.</t>
+  <t>The ISIS protocol supports a similar mechanism that is described in RFC 5130
+  <xref target="RFC5130"/>.</t>
+  <section title="Requirements Language">
+  <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL
+     NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED",
+     "MAY", and "OPTIONAL" in this document are to be interpreted as
+     described in BCP 14 <xref target="RFC2119"/> <xref target="RFC8174"/>
+     when, and only when, they appear in all capitals, as shown here.</t>
+   </section>
+</section>
+
+<section anchor="UINT32-TAG" title="32-Bit Administrative Tag Sub-TLV">
+<t>This document creates a new Administrative Tag Sub-TLV for OSPFv2 and
+   OSPFv3. This Sub-TLV specifies one or
+   more 32-bit unsigned integers that may be associated with an
+   OSPF advertised prefix. The precise usage of these tags is beyond
+   the scope of this document.</t>
+   <t>
+     The format of this Sub-TLV
+     is the same as the format used by the Traffic Engineering
+     Extensions to OSPF <xref target="RFC3630"/>.  The LSA payload consists of one or
+     more nested Type/Length/Value (TLV) triplets.  The format of
+     each TLV is:
+    </t>
+   <figure title="TLV Format">
+     <artwork>
+
+   0                   1                   2                   3
+   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+  |              Type             |             Length            |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+  |                            Value...                           |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+     </artwork>
+  </figure>
+    <t>The Length field defines the length of the value portion in octets
+    (thus a TLV with no value portion would have a length of 0).  The
+    TLV is padded to 4-octet alignment;  padding is not included in
+    the length field (so a 3-octet value would have a length of
+    3, but the total size of the TLV would be 8 octets).</t>
+
+    <t>
+      The format of the 32-bit Administrative Tag TLV is as follows:
+    </t>
+<figure title="32-bit Administrative Tag Sub-TLV">
+  <artwork>
+
+    0                   1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |              Type             |             Length            |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |             First 32-bit Administrative Tag                   |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                             o                                 |
+                                 o
+   |                             o                                 |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |             Last 32-bit Administrative Tag                    |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+
+   Type     A 16-bit field set to TBD. The value MAY be different
+            depending upon the IANA registry from which it is
+            allocated.
+
+   Length   A 16-bit field that indicates the length of the value
+            portion in octets and will be a multiple of 4 octets
+            dependent on the number of administrative tags
+            advertised. If the sub-TLV is specified, at least one
+            administrative tag must be advertised.
+
+   Value    A variable length list of one or more administrative
+            tags.
+     </artwork>
+  </figure>
+   <t>This sub-TLV will carry one or more 32-bit unsigned integer values
+that will be used as administrative tags.</t>
+</section>
+<section anchor="APPLICABILTY" title="Administrative Tag Applicability">
+  <t>
+    The administrative tag TLV specified herein will be valid as a sub-TLV of
+    the following TLVs specified in <xref target="RFC7684"/>:
+  </t>
+  <ol spacing="normal">
+    <li>Extended Prefix TLV advertised in the OSPFv2 Extended Prefix LSA</li>
+  </ol>
+  <t>
+    The administrative tag TLV specified herein will be valid as a sub-TLV of
+    the following TLVs specified in <xref target="RFC8362"/>:
+  </t>
+  <ol spacing="normal">
+    <li>Inter-Area-Prefix TLV advertised in the E-Inter-Area-Prefix-LSA</li>
+    <li>Intra-Area-Prefix TLV advertised in the E-Link-LSA and the E-Intra-Area-Prefix-LSA</li>
+    <li>External-Prefix TLV advertised in the E-AS-External-LSA and the E-NSSA-LSA</li>
+  </ol>
+</section>
+<section anchor="OSPF-OPERATION" title="Protocol Operation">
+<t>An OSPF router supporting this specification MUST propagate administrative tags
+when acting as an Area Border Router and originating summary advertisements into other
+areas. Similarly, an OSPF router supporting this specification and acting as an ABR for a
+Not-So-Stubby Area (NSSA) MUST propagate tags when translating NSSA routes to
+AS External advertisements <xref target="RFC3101"/>. The number of tags supported MAY limit
+the number of tags that are propagated. When propagating multiple tags, the order of the
+the tags must be preserved.</t>
+<t>For configured area ranges, NSSA ranges, and configurated summarization of redistributed
+routes, tags from component routes SHOULD NOT be propagated to the summary. Implementations
+SHOULD provide a mechanism to configure tags for area ranges, NSSA ranges, and redistributed
+route summaries.</t>
+<t>An OSPF router supporting this specification MUST be able to advertise and interpret one
+32-bit tag for prefixes. An OSPF router supporting this
+specification MAY be able to advertise and propagate multiple 32-bit tags. The
+maximum tags that an implementation supports is a local matter depending upon supported
+applications using the prefix or link tags.</t>
+<t>When a single tag is advertised for AS External or NSSA LSA prefix, the existing tag in
+OSPFv2 and OSPFv3 AS-External-LSA and NSSA-LSA encodings SHOULD be utilized. This will facilitate
+backward compatibilty with implementations that do not support this specification.
+</t>
+<section anchor="ECMP" title="Equal-Cost Multipath Applicability">
+<t>When multiple LSAs contribute to an OSPF route, it is possible that these
+LSAs will all have different tags. In this situation, the OSPF router MUST associate
+the tags from one of the LSAs contributing a path and, if the implementation supports
+multiple tags, MAY associate tags for multiple contributing LSAs up to the maximum
+number of tags supported.</t>
+</section>
+</section>
+
+<section title="Security Considerations">
+   <t>This document describes a generic mechanism for advertising
+      administrative tags for OSPF prefixes.
+      The administrative tags are generally less critical
+      than the topology information currently advertised by the base
+      OSPF protocol.
+      The security considerations for the generic mechanism are dependent
+      on their application. One such application is to control leaking of OSPF
+      routes to other protocols (e.g., BGP <xref target="RFC4271"/>). If an attacker
+      were able to modify
+      the admin tags associated with OSPF routes and they were be used for this
+      application, such routes could be prevented from being advertised in routing
+      domains where they are required (subtle denial or service) or they could be
+      advertised into routing domains where they shouldn't be advertised (routing
+      vulnerability). 
+      Security considerations for the base OSPF protocol are covered
+      in <xref target="RFC2328"/> and <xref target="RFC5340"/>.</t>
+</section>
+<section title="IANA Considerations">
+  <t>
+    The following values should be allocated from the OSPF Extended Prefix
+    TLV Sub-TLV Registry <xref target="RFC7684"/>:
+  </t>
+  <ul spacing="normal">
+    <li>TBD - 32-bit Administrative Tag TLV</li>
+  </ul>
+  <t>
+    The following values should be allocated from the OSPFv3 Extended-LSA
+    Sub-TLV Registry <xref target="RFC8362"/>:
+  </t>
+  <ul spacing="normal">
+    <li>TBD - 32-bit Administrative Tag TLV</li>
+  </ul>
+</section>
+  <section title="Acknowledgments">
+   <t>The authors of RFC 5130 are acknowledged since this document draws upon both the
+      ISIS specification and deployment experience.</t>
+   <t>Thanks to Donnie Savage for his comments and questions.</t>
+   <t>The RFC text was produced using Marshall Rose's xml2rfc tool.</t>
+  </section>
+</middle>
+<?rfc needLines="20"?>
+<back>
+<references title="Normative References">
+      &RFC2119;
+      &RFC2328;
+      &RFC3630;
+      &RFC5340;
+      &RFC7684;
+      &RFC8174;
+      &RFC8362;
+</references>
+
+<references title="Informative References">
+      &RFC3101;
+      &RFC4271;
+      &RFC5130;
+      &RFC8920;
+</references>
+<section anchor="UINT64-TAG" title="64-Bit Administrative Tag Sub-TLV">
+  <t>The definition of the 64-bit tag was considered but discard given that
+     there is no strong requirement or use case. The specification is
+     included here for information.</t>
+  <t>This sub-TLV will carry one or more 64-bit unsigned integer values
+that will be used as administrative tags.</t>
+ <t>
+  The format of the 64-bit Administrative Tag TLV is as follows:
+ </t>
+<figure title="64-bit Administrative Tag TLV">
+  <artwork>
+
+    0                   1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |              Type             |             Length            |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |             First 64-bit Administrative Tag                   |
+   |                                                               |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                             O                                 |
+                                 o
+   |                             o                                 |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |             Last 64-bit Administrative Tag                    |
+   |                                                               |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+
+   Type     A 16-bit field set to TBD. The value MAY be different
+            depending upon the registry from which it is allocated.
+
+   Length   A 16-bit field that indicates the length of the value
+            portion in octets and will be a multiple of 8 octets
+            dependent on the number of administrative tags
+            advertised. If the sub-TLV is specified, at least one
+            administrative tag must be advertised.
+
+   Value    A variable length list of one or more 64-bit
+            administrative tags.
+     </artwork>
+  </figure>
+</section>
+<section title="Link Administrative Tags">
+   <t>The advertisement of administrative tags corresponding to links has
+   been removed from the document.  The specification of advertising
+   link administrative groups as specified in
+   <xref target="RFC8920"/>
+   advertising administrative tags for links.</t>
+</section>
+</back>
+</rfc>
