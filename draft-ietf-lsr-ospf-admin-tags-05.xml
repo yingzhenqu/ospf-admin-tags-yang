@@ -8,18 +8,34 @@
       'http://xml.resource.org/public/rfc/bibxml/reference.RFC.3101.xml'>
     <!ENTITY RFC3630 PUBLIC ''
       'http://xml.resource.org/public/rfc/bibxml/reference.RFC.3630.xml'>
+    <!ENTITY RFC3688 PUBLIC ''
+      'http://xml.resource.org/public/rfc/bibxml/reference.RFC.3688.xml'>
     <!ENTITY RFC4271 PUBLIC ''
       'http://xml.resource.org/public/rfc/bibxml/reference.RFC.4271.xml'>
     <!ENTITY RFC5130 PUBLIC ''
       'http://xml.resource.org/public/rfc/bibxml/reference.RFC.5130.xml'>
     <!ENTITY RFC5340 PUBLIC ''
       'http://xml.resource.org/public/rfc/bibxml/reference.RFC.5340.xml'>
+    <!ENTITY RFC6020 PUBLIC ''
+      'http://xml.resource.org/public/rfc/bibxml/reference.RFC.6020.xml'>
+    <!ENTITY RFC6241 PUBLIC ''
+      'http://xml.resource.org/public/rfc/bibxml/reference.RFC.6241.xml'>
+    <!ENTITY RFC6242 PUBLIC ''
+      'http://xml.resource.org/public/rfc/bibxml/reference.RFC.6242.xml'>
     <!ENTITY RFC7684 PUBLIC ''
       'http://xml.resource.org/public/rfc/bibxml/reference.RFC.7684.xml'>
+    <!ENTITY RFC7950 PUBLIC ''
+      'http://xml.resource.org/public/rfc/bibxml/reference.RFC.7950.xml'>
+    <!ENTITY RFC8040 PUBLIC ''
+      'http://xml.resource.org/public/rfc/bibxml/reference.RFC.8040.xml'>
     <!ENTITY RFC8174 PUBLIC ''
       'http://xml.resource.org/public/rfc/bibxml/reference.RFC.8174.xml'>
+    <!ENTITY RFC8341 PUBLIC ''
+      'http://xml.resource.org/public/rfc/bibxml/reference.RFC.8341.xml'>
     <!ENTITY RFC8362 PUBLIC ''
       'http://xml.resource.org/public/rfc/bibxml/reference.RFC.8362.xml'>
+    <!ENTITY RFC8446 PUBLIC ''
+      'http://xml.resource.org/public/rfc/bibxml/reference.RFC.8446.xml'>
     <!ENTITY RFC8920 PUBLIC ''
       'http://xml.resource.org/public/rfc/bibxml/reference.RFC.8920.xml'>
     ]>
@@ -32,7 +48,7 @@
 <?rfc rfcedstyle="yes" ?>
 <?rfc subcompact="no" ?>
 
-<rfc category="std" ipr="trust200902" docName="draft-ietf-lsr-ospf-admin-tags-04"
+<rfc category="std" ipr="trust200902" docName="draft-ietf-lsr-ospf-admin-tags-05"
   consensus="true" submissionType="IETF" version="3">
 
 <front>
@@ -220,7 +236,7 @@ maximum tags that an implementation supports is a local matter depending upon su
 applications using the prefix or link tags.</t>
 <t>When a single tag is advertised for AS External or NSSA LSA prefix, the existing tag in
 OSPFv2 and OSPFv3 AS-External-LSA and NSSA-LSA encodings SHOULD be utilized. This will facilitate
-backward compatibilty with implementations that do not support this specification.
+backward compatibility with implementations that do not support this specification.
 </t>
 <section anchor="ECMP" title="Equal-Cost Multipath Applicability">
 <t>When multiple LSAs contribute to an OSPF route, it is possible that these
@@ -230,6 +246,373 @@ multiple tags, MAY associate tags for multiple contributing LSAs up to the maxim
 number of tags supported.</t>
 </section>
 </section>
+
+<section title="YANG Data Model">
+  <t>YANG <xref target="RFC7950"></xref> is a data definition language 
+      used to define the contents of a conceptual data store 
+      that allows networked devices to be managed using NETCONF 
+      <xref target="RFC6241"/> or RESTCONF <xref target="RFC8040"/>.</t>
+  <t>This section defines a YANG data model that can be used to configure
+    and manage the prefix administrative tags defined in this document,
+    which augments the OSPF YANG data model.</t>
+
+  <t>The following show the tree diagram of the module:</t>
+<artwork align="left" name="" type="" alt=""><![CDATA[
+module: ietf-ospf-admin-tags
+
+  augment /rt:routing/rt:control-plane-protocols
+          /rt:control-plane-protocol/ospf:ospf/ospf:areas/ospf:area
+          /ospf:interfaces/ospf:interface:
+    +--rw admin-tags
+       +--rw tags*   uint32
+  augment /rt:routing/rt:control-plane-protocols
+          /rt:control-plane-protocol/ospf:ospf/ospf:areas/ospf:area
+          /ospf:interfaces/ospf:interface/ospf:database
+          /ospf:link-scope-lsa-type/ospf:link-scope-lsas
+          /ospf:link-scope-lsa/ospf:version/ospf:ospfv2/ospf:ospfv2
+          /ospf:body/ospf:opaque/ospf:extended-prefix-opaque
+          /ospf:extended-prefix-tlv:
+    +--ro perfix-admin-tag-sub-tlvs
+       +--ro admin-tag-sub-tlv* []
+          +--ro admin-tags*   uint32
+  augment /rt:routing/rt:control-plane-protocols
+          /rt:control-plane-protocol/ospf:ospf/ospf:areas/ospf:area
+          /ospf:database/ospf:area-scope-lsa-type/ospf:area-scope-lsas
+          /ospf:area-scope-lsa/ospf:version/ospf:ospfv2/ospf:ospfv2
+          /ospf:body/ospf:opaque/ospf:extended-prefix-opaque
+          /ospf:extended-prefix-tlv:
+    +--ro perfix-admin-tag-sub-tlvs
+       +--ro admin-tag-sub-tlv* []
+          +--ro admin-tags*   uint32
+  augment /rt:routing/rt:control-plane-protocols
+          /rt:control-plane-protocol/ospf:ospf/ospf:database
+          /ospf:as-scope-lsa-type/ospf:as-scope-lsas/ospf:as-scope-lsa
+          /ospf:version/ospf:ospfv2/ospf:ospfv2/ospf:body/ospf:opaque
+          /ospf:extended-prefix-opaque/ospf:extended-prefix-tlv:
+    +--ro perfix-admin-tag-sub-tlvs
+       +--ro admin-tag-sub-tlv* []
+          +--ro admin-tags*   uint32
+  augment /rt:routing/rt:control-plane-protocols
+          /rt:control-plane-protocol/ospf:ospf/ospf:areas/ospf:area
+          /ospf:database/ospf:area-scope-lsa-type/ospf:area-scope-lsas
+          /ospf:area-scope-lsa/ospf:version/ospf:ospfv3/ospf:ospfv3
+          /ospf:body/ospfv3-e-lsa:e-inter-area-prefix
+          /ospfv3-e-lsa:e-inter-prefix-tlvs
+          /ospfv3-e-lsa:inter-prefix-tlv:
+    +--ro perfix-admin-tag-sub-tlvs
+       +--ro admin-tag-sub-tlv* []
+          +--ro admin-tags*   uint32
+  augment /rt:routing/rt:control-plane-protocols
+          /rt:control-plane-protocol/ospf:ospf/ospf:areas/ospf:area
+          /ospf:database/ospf:area-scope-lsa-type/ospf:area-scope-lsas
+          /ospf:area-scope-lsa/ospf:version/ospf:ospfv3/ospf:ospfv3
+          /ospf:body/ospfv3-e-lsa:e-intra-area-prefix
+          /ospfv3-e-lsa:e-intra-prefix-tlvs
+          /ospfv3-e-lsa:intra-prefix-tlv:
+    +--ro perfix-admin-tag-sub-tlvs
+       +--ro admin-tag-sub-tlv* []
+          +--ro admin-tags*   uint32
+  augment /rt:routing/rt:control-plane-protocols
+          /rt:control-plane-protocol/ospf:ospf/ospf:areas/ospf:area
+          /ospf:interfaces/ospf:interface/ospf:database
+          /ospf:link-scope-lsa-type/ospf:link-scope-lsas
+          /ospf:link-scope-lsa/ospf:version/ospf:ospfv3/ospf:ospfv3
+          /ospf:body/ospfv3-e-lsa:e-link/ospfv3-e-lsa:e-link-tlvs
+          /ospfv3-e-lsa:intra-prefix-tlv:
+    +--ro perfix-admin-tag-sub-tlvs
+       +--ro admin-tag-sub-tlv* []
+          +--ro admin-tags*   uint32
+  augment /rt:routing/rt:control-plane-protocols
+          /rt:control-plane-protocol/ospf:ospf/ospf:database
+          /ospf:as-scope-lsa-type/ospf:as-scope-lsas/ospf:as-scope-lsa
+          /ospf:version/ospf:ospfv3/ospf:ospfv3/ospf:body
+          /ospfv3-e-lsa:e-as-external/ospfv3-e-lsa:e-external-tlvs
+          /ospfv3-e-lsa:external-prefix-tlv:
+    +--ro perfix-admin-tag-sub-tlvs
+       +--ro admin-tag-sub-tlv* []
+          +--ro admin-tags*   uint32
+  augment /rt:routing/rt:control-plane-protocols
+          /rt:control-plane-protocol/ospf:ospf/ospf:database
+          /ospf:as-scope-lsa-type/ospf:as-scope-lsas/ospf:as-scope-lsa
+          /ospf:version/ospf:ospfv3/ospf:ospfv3/ospf:body
+          /ospfv3-e-lsa:e-nssa/ospfv3-e-lsa:e-external-tlvs
+          /ospfv3-e-lsa:external-prefix-tlv:
+    +--ro perfix-admin-tag-sub-tlvs
+       +--ro admin-tag-sub-tlv* []
+          +--ro admin-tags*   uint32
+      ]]></artwork> 
+
+<t>The following is the YANG module:</t>
+<sourcecode name="ietf-ospf-admin-tags@2022-10-11.yang" type="" markers="true"><![CDATA[
+module ietf-ospf-admin-tags {
+  yang-version 1.1;
+  namespace "urn:ietf:params:xml:ns:yang:ietf-ospf-admin-tags";
+  prefix ospf-admin-tags;
+
+  import ietf-routing {
+    prefix "rt";
+    reference "RFC 8349: A YANG Data Model for Routing
+               Management (NMDA Version)";
+  }
+
+  import ietf-ospf {
+    prefix ospf;
+    reference "RFC xxxx: YANG Data Model for OSPF Protocol.";
+  }
+
+  import ietf-ospfv3-extended-lsa {
+    prefix "ospfv3-e-lsa";
+    reference "RFC xxxx: YANG Model for OSPFv3 Extended LSAs.";
+  }
+
+  organization
+    "IETF LSR - Link State Routing Working Group";
+
+  contact
+     "WG Web:   <https://datatracker.ietf.org/wg/lsr/>
+      WG List:  <mailto:lsr@ietf.org>
+
+      Author:   Yingzhen Qu
+                <mailto:yingzhen.qu@futurewei.com>
+      Author:   Acee Lindem
+                <mailto:acee@cisco.com>
+      Author:   Peter Psenak
+                <mailto:ppsenak@cisco.com>";
+
+
+  description
+    "This YANG module defines the configuration
+     and operational state for OSPF administrative tags.
+
+     This YANG model conforms to the Network Management
+     Datastore Architecture (NMDA) as described in RFC 8342.
+
+     Copyright (c) 2022 IETF Trust and the persons identified as
+     authors of the code.  All rights reserved.
+
+     Redistribution and use in source and binary forms, with or
+     without modification, is permitted pursuant to, and subject to
+     the license terms contained in, the Revised BSD License set
+     forth in Section 4.c of the IETF Trust's Legal Provisions
+     Relating to IETF Documents
+     (https://trustee.ietf.org/license-info).
+
+     This version of this YANG module is part of RFC XXXX;
+     see the RFC itself for full legal notices.
+
+     The key words 'MUST', 'MUST NOT', 'REQUIRED', 'SHALL', 'SHALL
+     NOT', 'SHOULD', 'SHOULD NOT', 'RECOMMENDED', 'NOT RECOMMENDED',
+     'MAY', and 'OPTIONAL' in this document are to be interpreted as
+     described in BCP 14 (RFC 2119) (RFC 8174) when, and only when,
+     they appear in all capitals, as shown here.";
+
+  reference "RFC XXXX";
+
+  revision 2022-10-11 {
+    description
+      "Initial revision.";
+    reference
+      "RFC XXXX: A YANG Data Model for OSPFv2 Administrative Tags.";
+  }
+
+  grouping prefix-admin-tag-sub-tlvs {
+    description "Prefix Administrative Tag sub-TLVs.";
+
+    container perfix-admin-tag-sub-tlvs{
+      description "Prefix admin tag sub-TLV.";
+      list admin-tag-sub-tlv {
+        description "Prefix admin tag sub-TLV.";
+        leaf-list admin-tags {
+          type uint32;
+          description "32-bit administrative tag.";
+        }
+      }
+    }
+  }
+
+  /* Configuration */
+  augment "/rt:routing/rt:control-plane-protocols/"
+        + "rt:control-plane-protocol/ospf:ospf/"
+        + "ospf:areas/ospf:area/ospf:interfaces/ospf:interface" {
+        when "derived-from-or-self(../../../../../"
+           + "rt:type, 'ospf:ospf')" {
+      description
+        "This augments the OSPF routing protocol interface
+         configuration.";
+    }
+    description
+      "This augments the OSPF protocol interface configuration
+       with Administrative Tags. The configured tags will be
+      advertised with local prefixes configured for the interface.";
+
+    container admin-tags {
+      leaf-list tags {
+        type uint32;
+        description
+          "32-bit administrative tags.";
+      }
+      description
+        "OSPF prefix administrative tags.";
+    }
+  }
+
+  /* Database */
+  augment "/rt:routing/"
+        + "rt:control-plane-protocols/rt:control-plane-protocol/"
+        + "ospf:ospf/ospf:areas/ospf:area/"
+        + "ospf:interfaces/ospf:interface/ospf:database/"
+        + "ospf:link-scope-lsa-type/ospf:link-scope-lsas/"
+        + "ospf:link-scope-lsa/ospf:version/ospf:ospfv2/"
+        + "ospf:ospfv2/ospf:body/ospf:opaque/"
+        + "ospf:extended-prefix-opaque/ospf:extended-prefix-tlv" {
+    when "derived-from-or-self(../../../../../../../../../../"
+       + "../../../../rt:type, 'ospf:ospfv2')" {
+      description
+        "This augmentation is only valid for OSPFv2.";
+    }
+    description
+      "Prefix Administrative Tag Sub-TLVs for OSPFv2 extended prefix
+       TLV in type 9 opaque LSA.";
+    uses prefix-admin-tag-sub-tlvs;
+  }
+
+
+  augment "/rt:routing/"
+        + "rt:control-plane-protocols/rt:control-plane-protocol/"
+        + "ospf:ospf/ospf:areas/"
+        + "ospf:area/ospf:database/"
+        + "ospf:area-scope-lsa-type/ospf:area-scope-lsas/"
+        + "ospf:area-scope-lsa/ospf:version/ospf:ospfv2/"
+        + "ospf:ospfv2/ospf:body/ospf:opaque/"
+        + "ospf:extended-prefix-opaque/ospf:extended-prefix-tlv" {
+    when "derived-from-or-self(../../../../../../../../../../"
+       + "../../rt:type, 'ospf:ospfv2')" {
+      description
+        "This augmentation is only valid for OSPFv2.";
+    }
+    description
+      "Prefix Administrative Tag Sub-TLVs for OSPFv2 extended prefix
+       TLV in type 10 opaque LSA.";
+    uses prefix-admin-tag-sub-tlvs;
+  }
+
+  augment "/rt:routing/"
+        + "rt:control-plane-protocols/rt:control-plane-protocol/"
+        + "ospf:ospf/ospf:database/"
+        + "ospf:as-scope-lsa-type/ospf:as-scope-lsas/"
+        + "ospf:as-scope-lsa/ospf:version/ospf:ospfv2/"
+        + "ospf:ospfv2/ospf:body/ospf:opaque/"
+        + "ospf:extended-prefix-opaque/ospf:extended-prefix-tlv" {
+    when "derived-from-or-self(../../../../../../../../"
+       + "../../rt:type, 'ospf:ospfv2')" {
+      description
+        "This augmentation is only valid for OSPFv2.";
+    }
+    description
+      "Prefix Administrative Tag Sub-TLVs for OSPFv2 extended prefix
+       TLV in type 11 opaque LSA.";
+    uses prefix-admin-tag-sub-tlvs;
+  }
+
+  augment "/rt:routing/"
+    + "rt:control-plane-protocols/rt:control-plane-protocol/"
+    + "ospf:ospf/ospf:areas/ospf:area/ospf:database/"
+    + "ospf:area-scope-lsa-type/ospf:area-scope-lsas/"
+    + "ospf:area-scope-lsa/ospf:version/ospf:ospfv3/"
+    + "ospf:ospfv3/ospf:body/ospfv3-e-lsa:e-inter-area-prefix/"
+    + "ospfv3-e-lsa:e-inter-prefix-tlvs/"
+    + "ospfv3-e-lsa:inter-prefix-tlv" {
+    when "derived-from-or-self(../../../../../../../../../../"
+       + "../../rt:type, 'ospf:ospfv3')" {
+      description
+        "This augmentation is only valid for OSPFv3.";
+    }
+    description
+      "Augment OSPFv3 Inter-Area-Prefix TLV in the
+       E-Inter-Area-Prefix LSA.";
+
+    uses prefix-admin-tag-sub-tlvs;
+  }
+
+  augment "/rt:routing/"
+    + "rt:control-plane-protocols/rt:control-plane-protocol/"
+    + "ospf:ospf/ospf:areas/ospf:area/ospf:database/"
+    + "ospf:area-scope-lsa-type/ospf:area-scope-lsas/"
+    + "ospf:area-scope-lsa/ospf:version/ospf:ospfv3/"
+    + "ospf:ospfv3/ospf:body/ospfv3-e-lsa:e-intra-area-prefix/"
+    + "ospfv3-e-lsa:e-intra-prefix-tlvs/"
+    + "ospfv3-e-lsa:intra-prefix-tlv" {
+    when "/rt:routing/rt:control-plane-protocols"
+       + "/rt:control-plane-protocol/rt:type = 'ospf:ospfv3'" {
+      description
+        "This augmentation is only valid for OSPFv3.";
+    }
+    description
+      "Augment OSPFv3 Intra-Area-Prefix TLV in the
+       E-Intra-Area-Prefix LSA.";
+
+    uses prefix-admin-tag-sub-tlvs;
+  }
+
+  augment "/rt:routing/"
+    + "rt:control-plane-protocols/rt:control-plane-protocol/"
+    + "ospf:ospf/ospf:areas/ospf:area/"
+    + "ospf:interfaces/ospf:interface/ospf:database/"
+    + "ospf:link-scope-lsa-type/ospf:link-scope-lsas/"
+    + "ospf:link-scope-lsa/ospf:version/ospf:ospfv3/"
+    + "ospf:ospfv3/ospf:body/ospfv3-e-lsa:e-link/"
+    + "ospfv3-e-lsa:e-link-tlvs/ospfv3-e-lsa:intra-prefix-tlv" {
+    when "derived-from-or-self(../../../../../../../../../../"
+       + "../../../../rt:type, 'ospf:ospfv3')" {
+      description
+        "This augmentation is only valid for OSPFv3.";
+    }
+    description
+      "Augment OSPFv3 Intra-Area-Prefix TLV in the E-Link-LSA.";
+
+    uses prefix-admin-tag-sub-tlvs;
+  }
+
+  augment "/rt:routing/"
+    + "rt:control-plane-protocols/rt:control-plane-protocol/"
+    + "ospf:ospf/ospf:database/"
+    + "ospf:as-scope-lsa-type/ospf:as-scope-lsas/"
+    + "ospf:as-scope-lsa/ospf:version/ospf:ospfv3/"
+    + "ospf:ospfv3/ospf:body/ospfv3-e-lsa:e-as-external/"
+    + "ospfv3-e-lsa:e-external-tlvs/"
+    + "ospfv3-e-lsa:external-prefix-tlv" {
+    when "derived-from-or-self(../../../../../../../../"
+       + "../../rt:type, 'ospf:ospfv3')" {
+      description
+        "This augmentation is only valid for OSPFv3.";
+    }
+    description
+      "Augment OSPFv3 External-Prefix TLV in the E-AS-External-LSA.";
+
+    uses prefix-admin-tag-sub-tlvs;
+  }
+
+  augment "/rt:routing/"
+    + "rt:control-plane-protocols/rt:control-plane-protocol/"
+    + "ospf:ospf/ospf:database/"
+    + "ospf:as-scope-lsa-type/ospf:as-scope-lsas/"
+    + "ospf:as-scope-lsa/ospf:version/ospf:ospfv3/"
+    + "ospf:ospfv3/ospf:body/ospfv3-e-lsa:e-nssa/"
+    + "ospfv3-e-lsa:e-external-tlvs/"
+    + "ospfv3-e-lsa:external-prefix-tlv" {
+    when "derived-from-or-self(../../../../../../../../"
+       + "../../rt:type, 'ospf:ospfv3')" {
+      description
+        "This augmentation is only valid for OSPFv3.";
+    }
+    description
+      "Augment OSPFv3 External-Prefix TLV in the E-NSSA-LSA.";
+
+    uses prefix-admin-tag-sub-tlvs;
+  }
+}
+]]></sourcecode>
+</section> 
 
 <section title="Security Considerations">
    <t>This document describes a generic mechanism for advertising
@@ -248,6 +631,37 @@ number of tags supported.</t>
       vulnerability). 
       Security considerations for the base OSPF protocol are covered
       in <xref target="RFC2328"/> and <xref target="RFC5340"/>.</t>
+
+    <t>The YANG modules specified in this document define a schema for 
+       data that is designed to be accessed via network
+       management protocols such as NETCONF <xref target="RFC6241"/> or
+       RESTCONF <xref target="RFC8040"/>. The lowest NETCONF layer is the secure transport
+       layer, and the mandatory-to-implement secure transport is Secure Shell (SSH)
+       <xref target="RFC6242"/>. The lowest RESTCONF layer is HTTPS, and the
+       mandatory-to-implement secure transport is TLS <xref target="RFC8446"/>.</t>
+
+   <t>The NETCONF Access Control Model (NACM) <xref target="RFC8341"/> provides the 
+      means to restrict access for particular NETCONF or RESTCONF users to a
+      pre-configured subset of all available NETCONF or RESTCONF protocol 
+      operations and content.</t>
+
+  <t>The following data nodes defined in the YANG module that are
+    writable/creatable/deletable (i.e., config true, which is the default).
+    The modifications to these data nodes without proper protection can
+    have a negative effect on network operations.</t>
+    <ul empty="true" spacing="normal">
+      <li>/ospf:ospf/ospf:areas/ospf:area/ospf:interfaces/ospf:interface/admin-tags</li>
+    </ul>
+
+  <t>Some of the readable data nodes in this YANG module may be considered
+      sensitive or vulnerable in some network environments. Exposure of the
+      OSPF link state database may be useful in mounting a Denial-of-Service (DoS)
+      attacks. These are the readable data nodes:</t>
+    <ul empty="true" spacing="normal">
+      <li>/ospf:ospf/ospf:areas/ospf:area/ospf:interfaces/ospf:interface/admin-tags</li>
+      <li>/prefix-admin-tag-sub-tlvs</li>
+    </ul>
+
 </section>
 <section title="IANA Considerations">
   <t>
@@ -264,6 +678,25 @@ number of tags supported.</t>
   <ul spacing="normal">
     <li>TBD - 32-bit Administrative Tag TLV</li>
   </ul>
+
+  <t>The IANA is requested to assign one new URI from the IETF XML
+      registry (<xref target="RFC3688" format="default"/>). Authors are suggesting the
+      following URI:</t>
+      <artwork align="center" name="" type="" alt=""><![CDATA[
+               
+        URI: urn:ietf:params:xml:ns:yang:ietf-ospf-admin-tags
+        Registrant Contact: The IESG.
+        XML: N/A, the requested URI is an XML namespace
+]]></artwork>
+      <t> This document also requests one new YANG module name in the
+      YANG Module Names registry (<xref target="RFC6020" format="default"/>) with the following
+      suggestion :</t>
+      <artwork align="center" name="" type="" alt=""><![CDATA[
+            
+        name: ietf-ospf-admin-tags
+        namespace: urn:ietf:params:xml:ns:yang:ietf-ospf-admin-tags
+        prefix: ospf-admin-tags
+        reference: RFC XXXX]]></artwork>
 </section>
   <section title="Acknowledgments">
    <t>The authors of RFC 5130 are acknowledged since this document draws upon both the
@@ -278,10 +711,18 @@ number of tags supported.</t>
       &RFC2119;
       &RFC2328;
       &RFC3630;
+      &RFC3688;
       &RFC5340;
+      &RFC6020;
+      &RFC6241;
+      &RFC6242;
       &RFC7684;
+      &RFC7950;
+      &RFC8040;
       &RFC8174;
+      &RFC8341;
       &RFC8362;
+      &RFC8446;
 </references>
 
 <references title="Informative References">
